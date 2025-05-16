@@ -17,6 +17,9 @@ public interface IInvitationService
     /// </summary>
     public Task<ServiceResponse<InvitationDTO>> Get(Guid id, UserDTO? requestingUser = null, CancellationToken cancellationToken = default);
 
+    public Task<ServiceResponse<PagedResponse<InvitationDTO>>> GetInvitations(PaginationQueryParams pagination, UserDTO? requestingUser = null, CancellationToken cancellationToken = default);
+
+
     public Task<ServiceResponse> UncheckedMarkAsUsed(Guid id, UserDTO createdUser, CancellationToken cancellationToken = default);
 
     public Task<ServiceResponse<InvitationDTO>> UncheckedGet(Guid id, CancellationToken cancellationToken = default);

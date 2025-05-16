@@ -7,6 +7,7 @@ using MobyLabWebProgramming.Core.Responses;
 using MobyLabWebProgramming.Infrastructure.Authorization;
 using MobyLabWebProgramming.Infrastructure.Services.Implementations;
 using MobyLabWebProgramming.Infrastructure.Services.Interfaces;
+using System.ComponentModel.Design;
 
 namespace MobyLabWebProgramming.Backend.Controllers;
 
@@ -49,5 +50,16 @@ public class CommentController(IUserService userService, ICommentService comment
         return currentUser.Result != null ?
             FromServiceResponse(await commentService.GetComments(pagination)) :
             ErrorMessageResult<PagedResponse<CommentDTO>>(currentUser.Error);
+    }
+
+    [Authorize]
+    [HttpPut]
+    public async Task<ActionResult<RequestResponse>> Update([FromBody] CommentUpdateDTO comment)
+    {
+        var currentUser = await GetCurrentUser();
+
+        return currentUser.Result != null ?
+            FromServiceResponse(await commentService.UpdateComment(comment, currentUser.Result)) :
+            ErrorMessageResult(currentUser.Error);
     }
 }

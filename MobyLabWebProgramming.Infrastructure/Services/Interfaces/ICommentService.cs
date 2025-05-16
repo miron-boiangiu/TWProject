@@ -17,5 +17,7 @@ public interface ICommentService
     /// </summary>
     public Task<ServiceResponse> DeleteComment(Guid id, UserDTO? requestingUser = null, CancellationToken cancellationToken = default);
 
+    public Task<ServiceResponse> UpdateComment(CommentUpdateDTO comment, UserDTO? requestingUser = null, CancellationToken cancellationToken = default);
+
     public Task<ServiceResponse<PagedResponse<CommentDTO>>> GetComments(CommentPaginationSearchQueryParams pagination, CancellationToken cancellationToken = default);
 }

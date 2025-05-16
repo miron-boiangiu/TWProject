@@ -5,6 +5,7 @@ using MobyLabWebProgramming.Core.Entities;
 using MobyLabWebProgramming.Core.Requests;
 using MobyLabWebProgramming.Core.Responses;
 using MobyLabWebProgramming.Infrastructure.Authorization;
+using MobyLabWebProgramming.Infrastructure.Services.Implementations;
 using MobyLabWebProgramming.Infrastructure.Services.Interfaces;
 
 namespace MobyLabWebProgramming.Backend.Controllers;
@@ -16,7 +17,7 @@ namespace MobyLabWebProgramming.Backend.Controllers;
 [ApiController] // This attribute specifies for the framework to add functionality to the controller such as binding multipart/form-data.
 [Route("api/[controller]/[action]")] // The Route attribute prefixes the routes/url paths with template provides as a string, the keywords between [] are used to automatically take the controller and method name.
 public class InvitationController(IUserService userService, IInvitationService invitationService) : AuthorizedController(userService) // Here we use the AuthorizedController as the base class because it derives ControllerBase and also has useful methods to retrieve user information.
-{                                                                                         // Also, you may pass constructor parameters to a base class constructor and call as specific constructor from the base class.
+{// Also, you may pass constructor parameters to a base class constructor and call as specific constructor from the base class.
     [Authorize]
     [HttpGet] // This attribute will make the controller respond to a HTTP POST request on the route /api/User/Add.
     public async Task<ActionResult<RequestResponse<InvitationDTO>>> Generate()
@@ -37,5 +38,15 @@ public class InvitationController(IUserService userService, IInvitationService i
         return currentUser.Result != null ?
             FromServiceResponse(await invitationService.Get(invitationId, currentUser.Result)) :
             ErrorMessageResult<InvitationDTO>(currentUser.Error);
+    }
+
+    [Authorize]
+    [HttpGet] // This attribute will make the controller respond to a HTTP GET request on the route /api/User/GetPage.
+    public async Task<ActionResult<RequestResponse<PagedResponse<InvitationDTO>>>> GetPage([FromQuery] PaginationQueryParams pagination) // The FromQuery attribute will bind the parameters matching the names of
+    {
+        var currentUser = await GetCurrentUser();
+        return currentUser.Result != null ?
+            FromServiceResponse(await invitationService.GetInvitations(pagination, currentUser.Result)) :
+            ErrorMessageResult<PagedResponse<InvitationDTO>>(currentUser.Error);
     }
 }

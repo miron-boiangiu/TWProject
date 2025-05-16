@@ -14,7 +14,7 @@ public sealed class InvitationProjectionSpec : Specification<Invitation, Invitat
     /// <summary>
     /// Note that the specification projects the UserFile onto UserFileDTO together with the referenced User entity properties.
     /// </summary>
-    public InvitationProjectionSpec(bool orderByCreatedAt = false) =>
+    public InvitationProjectionSpec(bool orderByCreatedAt = true) =>
         Query.Select(e => new()
         {
             Id = e.Id,

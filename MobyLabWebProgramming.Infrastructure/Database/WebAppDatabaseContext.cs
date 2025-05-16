@@ -11,6 +11,7 @@ public sealed class WebAppDatabaseContext : DbContext
 {
     public DbSet<Like> Like { get; set; }
     public DbSet<Comment> Comment { get; set; }
+    public DbSet<Feedback> Feedback { get; set; }
 
     public WebAppDatabaseContext() { }
 

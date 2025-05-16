@@ -189,8 +189,8 @@ public static class WebApplicationBuilderExtensions
             .AddScoped<IMailService, MailService>()
             .AddScoped<ILikeService, LikeService>()
             .AddScoped<ICommentService, CommentService>()
-            .AddScoped<IInvitationService, InvitationService>();
-
+            .AddScoped<IInvitationService, InvitationService>()
+            .AddScoped<IFeedbackService, FeedbackService>();
         return builder;
     }
 

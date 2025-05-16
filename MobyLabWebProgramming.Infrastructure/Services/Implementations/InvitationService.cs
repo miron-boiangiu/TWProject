@@ -105,4 +105,23 @@ public class InvitationService(IRepository<WebAppDatabaseContext> repository) : 
 
         return ServiceResponse.ForSuccess<InvitationDTO>(invitationDTO);
     }
+
+    public async Task<ServiceResponse<PagedResponse<InvitationDTO>>> GetInvitations(PaginationQueryParams pagination, UserDTO? requestingUser = null, CancellationToken cancellationToken = default)
+    {
+        if (requestingUser == null) // Verify who can add the user, you can change this however you se fit.
+        {
+            return ServiceResponse.FromError< PagedResponse < InvitationDTO >> (new(HttpStatusCode.Unauthorized, "Need to be logged in to see invitations!", ErrorCodes.NotAuthorized));
+        }
+
+        if (requestingUser.Role != UserRoleEnum.Admin)
+        {
+            return ServiceResponse.FromError< PagedResponse < InvitationDTO >> (new(HttpStatusCode.Unauthorized, "Only admins are allowed to see invitations!", ErrorCodes.NotAuthorized));
+
+        }
+
+        var result = await repository.PageAsync(pagination, new InvitationProjectionSpec(), cancellationToken); // Use the specification and pagination API to get only some entities from the database.
+
+        return ServiceResponse.ForSuccess(result);
+    }
+
 }

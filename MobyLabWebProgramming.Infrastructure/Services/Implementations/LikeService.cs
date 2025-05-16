@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using MailKit;
 using MobyLabWebProgramming.Core.Constants;
 using MobyLabWebProgramming.Core.DataTransferObjects;
 using MobyLabWebProgramming.Core.Entities;
@@ -17,7 +16,7 @@ namespace MobyLabWebProgramming.Infrastructure.Services.Implementations;
 /// <summary>
 /// Inject the required services through the constructor.
 /// </summary>
-public class LikeService(IRepository<WebAppDatabaseContext> repository) : ILikeService
+public class LikeService(IRepository<WebAppDatabaseContext> repository, IMailService mailService) : ILikeService
 {
     public async Task<ServiceResponse> AddLike(Guid torrentId, UserDTO? requestingUser = null, CancellationToken cancellationToken = default)
     {
@@ -53,6 +52,8 @@ public class LikeService(IRepository<WebAppDatabaseContext> repository) : ILikeS
         //    Role = user.Role,
         //    Password = user.Password
         //}, cancellationToken); // A new entity is created and persisted in the database.
+
+        await mailService.SendMail(torrent.User.Email, "Someone liked your torrent!", MailTemplates.LikedTorrentTemplate(torrent.User.Name, requestingUser.Name), true, "Torrent app", cancellationToken); // You can send a notification on the user email. Change the email if you want.
 
         return ServiceResponse.ForSuccess();
     }

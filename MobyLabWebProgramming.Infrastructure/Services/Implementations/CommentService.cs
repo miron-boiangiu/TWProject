@@ -13,6 +13,7 @@ using MobyLabWebProgramming.Infrastructure.Database;
 using MobyLabWebProgramming.Infrastructure.Repositories.Interfaces;
 using MobyLabWebProgramming.Infrastructure.Services.Interfaces;
 using MobyLabWebProgramming.Infrastructure.EntityConfigurations;
+using Ardalis.Specification;
 
 namespace MobyLabWebProgramming.Infrastructure.Services.Implementations;
 
@@ -77,6 +78,37 @@ public class CommentService(IRepository<WebAppDatabaseContext> repository) : ICo
         var result = await repository.PageAsync(pagination, new CommentProjectionSpec(torrent), cancellationToken); // Use the specification and pagination API to get only some entities from the database.
 
         return ServiceResponse.ForSuccess(result);
+    }
+
+    public async Task<ServiceResponse> UpdateComment(CommentUpdateDTO comment, UserDTO? requestingUser = null, CancellationToken cancellationToken = default)
+    {
+        if (requestingUser == null) // Verify who can add the user, you can change this however you se fit.
+        {
+            return ServiceResponse.FromError(new(HttpStatusCode.Forbidden, "Need to be logged in to upddte a comment!", ErrorCodes.CannotDelete));
+        }
+
+        var repo_comment = await repository.GetAsync(new CommentProjectionSpec(comment.Id), cancellationToken); // First get the file entity from the database to find the location on the filesystem.
+        var comment_entity = await repository.GetAsync(new CommentSpec(comment.Id), cancellationToken);
+
+        if (repo_comment == null)
+        {
+            return ServiceResponse.FromError(new(HttpStatusCode.NotFound, "Cannot find the comment!", ErrorCodes.EntityNotFound));
+        }
+
+        if (requestingUser.Role != UserRoleEnum.Admin && requestingUser.Id != repo_comment.User.Id)
+        {
+            return ServiceResponse.FromError(new(HttpStatusCode.Unauthorized, "You can only update your own comment.", ErrorCodes.CannotDelete));
+        }
+
+        if (comment_entity != null) // Verify if the user is not found, you cannot update a non-existing entity.
+        {
+            comment_entity.Text = comment.Text ?? comment_entity.Text;
+
+            await repository.UpdateAsync(comment_entity, cancellationToken); // Update the entity and persist the changes.
+        }
+
+        return ServiceResponse.ForSuccess();
+
     }
 
     public async Task<ServiceResponse> DeleteComment(Guid id, UserDTO? requestingUser = null, CancellationToken cancellationToken = default)
